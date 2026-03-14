@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schede Prodotto AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+:root {
+  --bg: #0d0d0f;
+  --s1: #141416;
+  --s2: #1c1c20;
+  --bd: #2a2a30;
+  --acc: #e8ff47;
+  --acc2: #ff6b35;
+  --txt: #f0f0f0;
+  --muted: #777;
+  --ok: #4ade80;
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; }
+
+/* ---- HEADER ---- */
+header {
+  border-bottom: 1px solid var(--bd);
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--bg); z-index: 100;
+}
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; }
+.logo span { color: var(--acc); }
+.badge { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); background: var(--s2); border: 1px solid var(--bd); padding: 3px 10px; border-radius: 20px; }
+
+/* ---- TABS ---- */
+.tabs { display: flex; gap: 2px; padding: 20px 28px 0; border-bottom: 1px solid var(--bd); }
+.tab {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 9px 18px; border-radius: 8px 8px 0 0;
+  cursor: pointer; border: 1px solid transparent; border-bottom: none;
+  color: var(--muted); background: transparent; transition: all .2s;
+}
+.tab:hover { color: var(--txt); }
+.tab.on { background: var(--s1); border-color: var(--bd); color: var(--acc); }
+
+/* ---- LAYOUT ---- */
+.main { display: flex; height: calc(100vh - 110px); }
+.panel { display: none; width: 100%; }
+.panel.on { display: flex; }
+
+/* SINGLE: two-column split */
+.split { display: grid; grid-template-columns: 400px 1fr; height: 100%; overflow: hidden; }
+
+/* ---- LEFT PANEL ---- */
+.lp { border-right: 1px solid var(--bd); overflow-y: auto; padding: 24px 24px; display: flex; flex-direction: column; gap: 18px; }
+
+.sec-title { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+.fg { display: flex; flex-direction: column; gap: 7px; }
+label.lbl { font-size: 13px; font-weight: 500; color: #bbb; }
+label.lbl .h { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+input[type=text], textarea, select {
+  width: 100%; background: var(--s2); border: 1px solid var(--bd);
+  color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  border-radius: 8px; padding: 9px 13px; outline: none; transition: border-color .2s; resize: vertical;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--acc); }
+input::placeholder, textarea::placeholder { color: #444; }
+textarea { min-height: 88px; line-height: 1.5; }
+select option { background: var(--s2); }
+
+/* tone grid */
+.tg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.to {
+  font-size: 12px; padding: 8px; border-radius: 8px;
+  border: 1px solid var(--bd); background: var(--s2); color: var(--muted);
+  cursor: pointer; text-align: center; transition: all .15s;
+}
+.to:hover { color: var(--txt); border-color: #555; }
+.to.on { border-color: var(--acc); color: var(--acc); background: rgba(232,255,71,.07); }
+
+/* section tags */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.tag {
+  font-size: 12px; padding: 5px 13px; border-radius: 20px;
+  border: 1px solid var(--bd); background: var(--s2); color: var(--muted);
+  cursor: pointer; transition: all .15s; font-family: 'DM Mono', monospace;
+}
+.tag:hover { color: var(--txt); }
+.tag.on { border-color: var(--acc); color: var(--acc); background: rgba(232,255,71,.07); }
+
+/* research toggle card */
+.rtog {
+  background: var(--s2); border: 1px solid var(--bd); border-radius: 10px;
+  padding: 13px 15px; cursor: pointer; transition: border-color .2s;
+}
+.rtog:hover { border-color: rgba(232,255,71,.3); }
+.rtog.on { border-color: rgba(232,255,71,.5); background: rgba(232,255,71,.03); }
+.rtog-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pill { width: 34px; height: 19px; background: var(--bd); border-radius: 10px; position: relative; transition: background .2s; flex-shrink: 0; }
+.pill.on { background: var(--acc); }
+.knob { width: 13px; height: 13px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left .2s; }
+.pill.on .knob { left: 18px; }
+.rbadge { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; color: #000; background: var(--acc); padding: 2px 8px; border-radius: 4px; }
+.rinfo { font-size: 11px; color: #999; line-height: 1.5; margin-top: 10px; padding: 9px 12px; background: rgba(232,255,71,.04); border: 1px solid rgba(232,255,71,.15); border-radius: 7px; }
+
+/* btn */
+.btn-p {
+  background: var(--acc); color: #000; font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 14px; padding: 13px 24px; border: none; border-radius: var(--r);
+  cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+}
+.btn-p:hover { background: #f5ff6e; transform: translateY(-1px); }
+.btn-p:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.btn-s {
+  background: transparent; color: var(--txt); font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 12px; padding: 8px 16px; border: 1px solid var(--bd); border-radius: var(--r);
+  cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-s:hover { border-color: var(--txt); }
+
+/* ---- RIGHT PANEL ---- */
+.rp { overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted); text-align: center; }
+.empty-ico { font-size: 44px; opacity: .25; }
+.empty h2 { font-family: 'Syne', sans-serif; font-size: 18px; color: var(--txt); }
+.empty p { font-size: 13px; line-height: 1.6; max-width: 260px; }
+
+/* loading */
+.ld { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 60px 20px; color: var(--muted); text-align: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { width: 30px; height: 30px; border: 2px solid var(--bd); border-top-color: var(--acc); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
+.dots::after { content: ''; animation: dots 1.2s steps(4,end) infinite; }
+
+/* step indicator */
+.steps { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+.sd { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; background: var(--s2); border: 1px solid var(--bd); flex-shrink: 0; }
+.sd.done { background: var(--ok); border-color: var(--ok); color: #000; }
+.sd.act { background: var(--acc); border-color: var(--acc); color: #000; animation: pulse 1s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+.sl { width: 20px; height: 1px; background: var(--bd); }
+
+/* research preview */
+.rbox { background: var(--s1); border: 1px solid rgba(232,255,71,.2); border-radius: 12px; overflow: hidden; }
+.rbox-hd { padding: 11px 16px; background: rgba(232,255,71,.05); border-bottom: 1px solid rgba(232,255,71,.15); display: flex; justify-content: space-between; align-items: center; }
+.rbox-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--acc); }
+.ri { padding: 9px 16px; border-bottom: 1px solid var(--bd); font-size: 12px; color: #ccc; line-height: 1.5; }
+.ri:last-child { border-bottom: none; }
+.rik { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--acc2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 3px; }
+
+/* result card */
+.rc { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; }
+.rs { padding: 16px 20px; border-bottom: 1px solid var(--bd); }
+.rs:last-child { border-bottom: none; }
+.rl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 7px; }
+.rv { font-size: 13px; line-height: 1.75; color: #ddd; white-space: pre-wrap; }
+.rv.big { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; color: var(--txt); line-height: 1.3; }
+
+/* summary strip */
+.sstrip { background: var(--s2); border: 1px solid var(--bd); border-radius: 9px; padding: 10px 16px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.sstrip strong { color: #ccc; }
+
+/* ---- CSV PANEL ---- */
+.csv-layout { display: flex; flex-direction: column; height: 100%; padding: 24px 28px; gap: 20px; overflow-y: auto; }
+.csv-top { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.upload-area {
+  border: 2px dashed var(--bd); border-radius: 12px; padding: 36px 24px;
+  text-align: center; cursor: pointer; transition: all .2s; background: var(--s1); position: relative;
+}
+.upload-area:hover, .upload-area.dov { border-color: var(--acc); background: rgba(232,255,71,.04); }
+.upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-area .uico { font-size: 34px; margin-bottom: 10px; opacity: .4; }
+.upload-area h3 { font-family: 'Syne', sans-serif; font-size: 14px; margin-bottom: 5px; }
+.upload-area p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.csv-set { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.csv-prev { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; }
+.csv-prev-hd { padding: 12px 18px; border-bottom: 1px solid var(--bd); display: flex; justify-content: space-between; align-items: center; }
+.tw { overflow-x: auto; max-height: 180px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: var(--s2); padding: 7px 13px; text-align: left; font-family: 'DM Mono', monospace; font-weight: 500; color: var(--muted); font-size: 10px; border-bottom: 1px solid var(--bd); white-space: nowrap; }
+td { padding: 7px 13px; border-bottom: 1px solid rgba(42,42,48,.5); color: #bbb; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+
+.stats { display: flex; gap: 10px; }
+.stat { background: var(--s2); border: 1px solid var(--bd); border-radius: 7px; padding: 8px 14px; text-align: center; }
+.stat-n { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--acc); }
+.stat-l { font-size: 10px; color: var(--muted); }
+
+.pbar-w { background: var(--s2); border-radius: 4px; height: 5px; overflow: hidden; }
+.pbar { height: 100%; background: linear-gradient(90deg,var(--acc),var(--acc2)); border-radius: 4px; transition: width .3s; }
+
+.rg { display: grid; gap: 12px; }
+.rm { background: var(--s1); border: 1px solid var(--bd); border-radius: 11px; overflow: hidden; transition: border-color .2s; }
+.rm:hover { border-color: rgba(232,255,71,.25); }
+.rm-hd { padding: 11px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bd); cursor: pointer; }
+.rm-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+.rm-body { padding: 14px 16px; display: none; flex-direction: column; gap: 12px; }
+.rm-body.op { display: flex; }
+
+.gen-footer { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn-exp { background: var(--s2); color: var(--txt); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; padding: 9px 18px; border: 1px solid var(--bd); border-radius: var(--r); cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 5px; }
+.btn-exp:hover { border-color: var(--acc); color: var(--acc); }
+.btn-exp:disabled { opacity: .35; cursor: not-allowed; }
+
+/* toast */
+.toast { position: fixed; bottom: 22px; right: 22px; background: var(--ok); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; padding: 11px 18px; border-radius: 9px; opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 999; }
+.toast.on { opacity: 1; transform: translateY(0); }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Schede<span>Prodotto</span>.ai</div>
+  <div class="badge">Agency Toolkit</div>
+</header>
+
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('single',this)">✦ Singolo</button>
+  <button class="tab" onclick="switchTab('multi',this)">⊞ Multi CSV</button>
+</div>
+
+<div class="main">
+
+  <!-- ===== SINGLE ===== -->
+  <div class="panel on split" id="panel-single">
+
+    <div class="lp">
+
+      <div class="fg">
+        <div class="sec-title">Prodotto</div>
+        <label class="lbl">Nome prodotto *</label>
+        <input type="text" id="s-name" placeholder="es. Scarpa Running Pro X3, Crema Retinol Age Repair…">
+      </div>
+
+      <div class="fg">
+        <label class="lbl">Categoria / Settore <span class="h">(opzionale)</span></label>
+        <input type="text" id="s-cat" placeholder="es. Abbigliamento sportivo, Cosmetica, Elettronica…">
+      </div>
+
+      <!-- RESEARCH TOGGLE -->
+      <div class="rtog" id="rtog" onclick="toggleResearch()">
+        <div class="rtog-row">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pill" id="rpill"><div class="knob"></div></div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--txt);">🔍 Ricerca automatica</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">L'AI cerca le caratteristiche del prodotto sul web</div>
+            </div>
+          </div>
+          <div class="rbadge" id="rbadge" style="display:none">ON</div>
+        </div>
+        <div class="rinfo" id="rinfo" style="display:none">
+          Hai solo il nome? L'AI cercherà specifiche tecniche, materiali, keyword SEO e contesto di mercato. I dati trovati saranno mostrati prima della generazione finale, così puoi verificare che il prodotto sia quello giusto.
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="lbl">Caratteristiche / Dati tecnici <span class="h" id="fhint">(opzionale se ricerca attiva)</span></label>
+        <textarea id="s-feat" placeholder="es. suola grip ammortizzata, tomaia mesh traspirante, peso 280g, impermeabile, disponibile in 5 colori…"></textarea>
+      </div>
+
+      <div class="fg">
+        <div class="sec-title">Tono di voce</div>
+        <div class="tg" id="tg">
+          <button class="to on" data-t="Professionale e autorevole" onclick="pickTone(this)">🏢 Professionale</button>
+          <button class="to" data-t="Amichevole e coinvolgente" onclick="pickTone(this)">😊 Amichevole</button>
+          <button class="to" data-t="Lusso, raffinato, premium" onclick="pickTone(this)">✦ Luxury</button>
+          <button class="to" data-t="Diretto, persuasivo, orientato alla conversione" onclick="pickTone(this)">⚡ Conversion</button>
+          <button class="to" data-t="Tecnico, dettagliato, specifico" onclick="pickTone(this)">🔧 Tecnico</button>
+          <button class="to" data-t="Giovane, fresco, dinamico, informale" onclick="pickTone(this)">🔥 Gen Z</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <div class="sec-title">Sezioni da generare</div>
+        <div class="tags" id="stags">
+          <button class="tag on" onclick="this.classList.toggle('on')">Titolo SEO</button>
+          <button class="tag on" onclick="this.classList.toggle('on')">Descrizione breve</button>
+          <button class="tag on" onclick="this.classList.toggle('on')">Descrizione completa</button>
+          <button class="tag on" onclick="this.classList.toggle('on')">Bullet point vantaggi</button>
+          <button class="tag on" onclick="this.classList.toggle('on')">Specifiche tecniche</button>
+          <button class="tag on" onclick="this.classList.toggle('on')">Meta description SEO</button>
+          <button class="tag" onclick="this.classList.toggle('on')">FAQ (3 domande)</button>
+          <button class="tag" onclick="this.classList.toggle('on')">Testo per categoria</button>
+          <button class="tag" onclick="this.classList.toggle('on')">Alt text immagine</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="lbl">Note brand / Brand voice <span class="h">(opzionale)</span></label>
+        <input type="text" id="s-notes" placeholder="es. Usa sempre il nome brand 'ProX', evita tecnicismi…">
+      </div>
+
+      <button class="btn-p" id="btnS" onclick="startSingle()">
+        <span id="btnSlbl">✦ Genera Scheda</span>
+      </button>
+
+    </div>
+
+    <div class="rp" id="rp">
+      <div class="empty" id="empty">
+        <div class="empty-ico">✦</div>
+        <h2>Pronto a generare</h2>
+        <p>Inserisci il nome del prodotto e premi <strong>Genera Scheda</strong>.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MULTI CSV ===== -->
+  <div class="panel" id="panel-multi">
+    <div class="csv-layout">
+
+      <div>
+        <div class="sec-title">Multi-Generator — Carica CSV</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px;">Genera schede per ogni riga. Colonne consigliate: <code style="color:var(--acc2)">nome</code>, <code style="color:var(--acc2)">caratteristiche</code>, <code style="color:var(--acc2)">categoria</code>, <code style="color:var(--acc2)">note</code></p>
+      </div>
+
+      <div class="csv-top">
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="upload-area" id="ua">
+            <input type="file" accept=".csv" id="csv-input" onchange="handleCSV(event)">
+            <div class="uico">📂</div>
+            <h3>Trascina il CSV qui</h3>
+            <p>oppure clicca per selezionarlo</p>
+          </div>
+          <div>
+            <div class="sec-title" style="margin-bottom:7px;">Oppure incolla qui</div>
+            <textarea id="mcsv" placeholder="nome,caratteristiche,categoria&#10;Scarpa X3,suola grip gel,Sport&#10;Crema Anti-Age,retinolo vitamina C,Beauty" style="min-height:80px;font-family:'DM Mono',monospace;font-size:11px;"></textarea>
+            <button class="btn-s" style="margin-top:7px;width:100%;justify-content:center;" onclick="parseManual()">↳ Carica dati</button>
+          </div>
+        </div>
+
+        <div class="csv-set">
+          <div class="sec-title">Impostazioni</div>
+
+          <div class="fg">
+            <label class="lbl">Tono di voce</label>
+            <select id="m-tone">
+              <option value="Professionale e autorevole">🏢 Professionale</option>
+              <option value="Amichevole e coinvolgente">😊 Amichevole</option>
+              <option value="Lusso, raffinato, premium">✦ Luxury</option>
+              <option value="Diretto, persuasivo, orientato alla conversione">⚡ Conversion</option>
+              <option value="Tecnico, dettagliato, specifico">🔧 Tecnico</option>
+              <option value="Giovane, fresco, dinamico, informale">🔥 Gen Z</option>
+            </select>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Sezioni da generare</label>
+            <div class="tags" id="mtags">
+              <button class="tag on" onclick="this.classList.toggle('on')">Titolo SEO</button>
+              <button class="tag on" onclick="this.classList.toggle('on')">Descrizione breve</button>
+              <button class="tag on" onclick="this.classList.toggle('on')">Descrizione completa</button>
+              <button class="tag on" onclick="this.classList.toggle('on')">Bullet point vantaggi</button>
+              <button class="tag on" onclick="this.classList.toggle('on')">Specifiche tecniche</button>
+              <button class="tag on" onclick="this.classList.toggle('on')">Meta description SEO</button>
+              <button class="tag" onclick="this.classList.toggle('on')">FAQ</button>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="m-res" style="width:15px;height:15px;accent-color:var(--acc);cursor:pointer;">
+              🔍 Ricerca automatica per ogni prodotto
+            </label>
+            <div style="font-size:11px;color:var(--muted);padding-left:23px;">Ideale se il CSV ha solo nomi senza caratteristiche</div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Note brand globali</label>
+            <input type="text" id="m-notes" placeholder="es. Tono caldo, evita tecnicismi…">
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE PREVIEW -->
+      <div class="csv-prev" id="cprev" style="display:none">
+        <div class="csv-prev-hd">
+          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">Anteprima</span>
+          <div class="stats">
+            <div class="stat"><div class="stat-n" id="st-rows">0</div><div class="stat-l">Prodotti</div></div>
+            <div class="stat"><div class="stat-n" id="st-cols">0</div><div class="stat-l">Colonne</div></div>
+          </div>
+        </div>
+        <div class="tw"><table id="ptable"></table></div>
+      </div>
+
+      <!-- GEN CONTROLS -->
+      <div id="cgen" style="display:none;display:none">
+        <div class="gen-footer">
+          <button class="btn-p" id="btnM" style="max-width:240px" onclick="generateMulti()">⊞ Genera Tutto</button>
+          <button class="btn-exp" id="bec" disabled onclick="exportCSV()">⬇ CSV</button>
+          <button class="btn-exp" id="bet" disabled onclick="exportTXT()">⬇ TXT</button>
+          <span id="mlbl" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div style="margin-top:10px;display:none" id="pbwrap">
+          <div class="pbar-w"><div class="pbar" id="pb" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="rg" id="mres"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✓ Copiato!</div>
+
+<script>
+var tone = 'Professionale e autorevole';
+var resMode = false;
+var csvRows = [];
+var multiOut = [];
+var resData = null;
+
+/* ---- TABS ---- */
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  el.classList.add('on');
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('panel-'+name).classList.add('on');
+}
+
+/* ---- RESEARCH TOGGLE ---- */
+function toggleResearch() {
+  resMode = !resMode;
+  document.getElementById('rpill').classList.toggle('on', resMode);
+  document.getElementById('rbadge').style.display = resMode ? 'block' : 'none';
+  document.getElementById('rinfo').style.display = resMode ? 'block' : 'none';
+  document.getElementById('rtog').classList.toggle('on', resMode);
+  document.getElementById('fhint').textContent = resMode ? '(l\'AI completerà automaticamente)' : '(opzionale se ricerca attiva)';
+  document.getElementById('btnSlbl').textContent = resMode ? '🔍 Ricerca & Genera' : '✦ Genera Scheda';
+  resData = null;
+}
+
+/* ---- TONE ---- */
+function pickTone(el) {
+  document.querySelectorAll('#tg .to').forEach(function(b){ b.classList.remove('on'); });
+  el.classList.add('on');
+  tone = el.getAttribute('data-t');
+}
+
+/* ---- GET SECTIONS ---- */
+function getSecs(id) {
+  return Array.from(document.querySelectorAll('#'+id+' .tag.on')).map(function(b){ return b.textContent.trim(); });
+}
+
+/* ---- BUILD PROMPTS ---- */
+function buildResearchPrompt(name, cat, extra) {
+  return 'Sei un esperto ricercatore di prodotti e-commerce italiani. Analizza il prodotto indicato e restituisci ESCLUSIVAMENTE un oggetto JSON valido, senza nessun testo prima o dopo, senza markdown, senza backtick.\n\nPRODOTTO: ' + name + '\nCATEGORIA: ' + (cat||'da determinare') + '\nINFO AGGIUNTIVE: ' + (extra||'nessuna') + '\n\nJSON da restituire:\n{"categoria_confermata":"...","tipologia":"descrizione breve di cosa e il prodotto","caratteristiche_principali":["...","...","...","...","..."],"materiali_composizione":"...","fascia_prezzo":"...","benefici_chiave":["...","...","..."],"keywords_seo":["...","...","...","..."],"competitor_tipici":"...","note_copywriting":"angolo persuasivo e tone consigliato"}';
+}
+
+function buildPrompt(name, feats, cat, notes, t, secs, research) {
+  var base = 'Sei un copywriter e-commerce esperto, specializzato in SEO per WooCommerce e WordPress. Scrivi in italiano.\n\n';
+  if (research) {
+    base += 'HAI A DISPOSIZIONE RICERCA APPROFONDITA SUL PRODOTTO:\n';
+    base += 'Categoria: ' + (research.categoria_confermata||cat||'Generale') + '\n';
+    base += 'Tipologia: ' + (research.tipologia||'') + '\n';
+    base += 'Caratteristiche: ' + (research.caratteristiche_principali||[]).join(', ') + '\n';
+    if (research.materiali_composizione) base += 'Materiali: ' + research.materiali_composizione + '\n';
+    base += 'Benefici chiave: ' + (research.benefici_chiave||[]).join(', ') + '\n';
+    base += 'Keywords SEO: ' + (research.keywords_seo||[]).join(', ') + '\n';
+    base += 'Fascia prezzo: ' + (research.fascia_prezzo||'n/d') + '\n';
+    base += 'Angolo copy: ' + (research.note_copywriting||'') + '\n';
+    if (feats) base += 'Note extra cliente: ' + feats + '\n';
+  } else {
+    base += 'PRODOTTO: ' + name + '\n';
+    base += 'CATEGORIA: ' + (cat||'Generale') + '\n';
+    base += 'CARATTERISTICHE: ' + (feats||'Deduci dal nome del prodotto con la tua conoscenza') + '\n';
+  }
+  if (notes) base += 'NOTE BRAND: ' + notes + '\n';
+  base += 'TONO: ' + t + '\n\n';
+  base += 'Genera SOLO queste sezioni, formattate come ### NOME SEZIONE\\n[contenuto]:\n';
+  secs.forEach(function(s){ base += '- ' + s + '\n'; });
+  base += '\nISTRUZIONI SPECIFICHE PER SEZIONE:\n';
+  base += '- Titolo SEO: max 65 caratteri, keyword principale inclusa, accattivante\n';
+  base += '- Descrizione breve: 2-3 frasi emozionali, max 160 caratteri, metti in evidenza il beneficio principale\n';
+  base += '- Descrizione completa: minimo 4 paragrafi. Para 1: presentazione prodotto e contesto di utilizzo. Para 2: caratteristiche principali con dettagli tecnici. Para 3: benefici concreti per chi lo usa. Para 4: CTA finale persuasiva. Tono coerente, copy professionale.\n';
+  base += '- Bullet point vantaggi: 6 punti, ogni punto inizia con emoji pertinente, max 15 parole a punto, focus su benefici reali\n';
+  base += '- Specifiche tecniche: elenco tecnico formattato con etichetta: valore (es. Peso: 280g), almeno 6 specifiche\n';
+  base += '- Meta description SEO: max 155 caratteri, include CTA, keyword principale\n';
+  base += '- FAQ: 3 domande reali di clienti con risposte sintetiche ma complete\n';
+  base += '- Testo per categoria: paragrafo introduttivo 80-120 parole per la pagina categoria\n';
+  base += '- Alt text immagine: descrittivo, include keyword, max 120 caratteri\n';
+  return base;
+}
+
+/* ---- CALL API ---- */
+function callAPI(prompt, useSearch) {
+  var body = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }]
+  };
+  if (useSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.error) throw new Error(d.error.message);
+    return d.content.filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('');
+  });
+}
+
+/* ---- PARSE SECTIONS ---- */
+function parseSecs(text) {
+  var out = {};
+  var re = /###\s*([^\n]+)\n([\s\S]*?)(?=###|$)/g;
+  var m;
+  while ((m = re.exec(text)) !== null) {
+    out[m[1].trim()] = m[2].trim();
+  }
+  if (!Object.keys(out).length) out['Contenuto'] = text.trim();
+  return out;
+}
+
+/* ---- STEPS HTML ---- */
+function stepsHTML(active) {
+  var s1 = active > 1 ? 'done' : active === 1 ? 'act' : '';
+  var s2 = active > 2 ? 'done' : active === 2 ? 'act' : '';
+  return '<div class="steps">'
+    + '<div class="sd '+s1+'">'+(active>1?'✓':'1')+'</div>'
+    + '<div style="font-size:12px;color:'+(active===1?'var(--txt)':'var(--muted)')+'">Ricerca</div>'
+    + '<div class="sl"></div>'
+    + '<div class="sd '+s2+'">'+(active>2?'✓':'2')+'</div>'
+    + '<div style="font-size:12px;color:'+(active===2?'var(--txt)':'var(--muted)')+'">Genera copy</div>'
+    + '</div>';
+}
+
+/* ---- START SINGLE ---- */
+function startSingle() {
+  var name = document.getElementById('s-name').value.trim();
+  if (!name) { alert('Inserisci il nome del prodotto.'); return; }
+  if (resMode) { doResearch(name); } else { doGenerate(name, null); }
+}
+
+/* ---- RESEARCH PHASE ---- */
+function doResearch(name) {
+  var btn = document.getElementById('btnS');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div><span>Ricerca in corso…</span>';
+  var rp = document.getElementById('rp');
+  rp.innerHTML = '<div class="ld">' + stepsHTML(1)
+    + '<div class="spin" style="margin-top:14px"></div>'
+    + '<span class="dots">Cerco informazioni su <strong>' + esc(name) + '</strong></span>'
+    + '<span style="font-size:11px;color:var(--muted);max-width:260px">Specifiche tecniche, materiali, keyword SEO, posizionamento di mercato…</span>'
+    + '</div>';
+
+  var cat = document.getElementById('s-cat').value.trim();
+  var extra = document.getElementById('s-feat').value.trim();
+
+  callAPI(buildResearchPrompt(name, cat, extra), true).then(function(raw) {
+    var json = raw.match(/\{[\s\S]*\}/);
+    var research = null;
+    if (json) {
+      try { research = JSON.parse(json[0]); } catch(e) {}
+    }
+    resData = research || { categoria_confermata: cat||'Generale', tipologia: name, caratteristiche_principali: extra ? extra.split(',') : [], benefici_chiave: [], keywords_seo: [name], fascia_prezzo: '', note_copywriting: '' };
+    showResearchPreview(name, resData);
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnSlbl">🔍 Ricerca & Genera</span>';
+  }).catch(function(e) {
+    rp.innerHTML = '<div class="ld" style="color:#f87171">Errore ricerca: ' + esc(e.message) + '</div>';
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnSlbl">🔍 Ricerca & Genera</span>';
+  });
+}
+
+/* ---- SHOW RESEARCH PREVIEW ---- */
+function showResearchPreview(name, r) {
+  var rp = document.getElementById('rp');
+  var items = [
+    { k: 'Categoria identificata', v: r.categoria_confermata },
+    { k: 'Tipologia prodotto', v: r.tipologia },
+    { k: 'Caratteristiche trovate', v: (r.caratteristiche_principali||[]).join(' · ') },
+    { k: 'Materiali / Composizione', v: r.materiali_composizione },
+    { k: 'Fascia prezzo mercato', v: r.fascia_prezzo },
+    { k: 'Benefici chiave', v: (r.benefici_chiave||[]).join(' · ') },
+    { k: 'Keywords SEO', v: (r.keywords_seo||[]).join(', ') },
+    { k: 'Competitor tipici', v: r.competitor_tipici },
+    { k: 'Angolo copy consigliato', v: r.note_copywriting }
+  ].filter(function(i){ return i.v && i.v.trim(); });
+
+  var rows = items.map(function(i){
+    return '<div class="ri"><div class="rik">' + esc(i.k) + '</div><div>' + esc(i.v) + '</div></div>';
+  }).join('');
+
+  rp.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+    + '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:700">🔍 Dati trovati per: ' + esc(name) + '</div>'
+    + stepsHTML(2) + '</div>'
+    + '<div class="rbox"><div class="rbox-hd"><div class="rbox-title">Verifica i dati prima di procedere</div><div style="font-size:11px;color:var(--muted)">Puoi modificare nel pannello sx</div></div>' + rows + '</div>'
+    + '<div style="font-size:12px;color:var(--muted)">✏️ Se qualcosa non è corretto, aggiungi dettagli nelle caratteristiche a sinistra.</div>'
+    + '<button class="btn-p" onclick="confirmGenerate(\''+esc(name).replace(/'/g,"\\'")+'\')">✦ Genera Scheda con questi dati</button>'
+    + '</div>';
+}
+
+/* ---- CONFIRM GENERATE (after research) ---- */
+function confirmGenerate(name) {
+  doGenerate(name, resData);
+}
+
+/* ---- GENERATE COPY ---- */
+function doGenerate(name, research) {
+  var btn = document.getElementById('btnS');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div><span>Scrittura copy…</span>';
+  var rp = document.getElementById('rp');
+  var phaseNum = research ? 2 : 1;
+  rp.innerHTML = '<div class="ld">' + (research ? stepsHTML(2) + '<div style="height:8px"></div>' : '')
+    + '<div class="spin"></div>'
+    + '<span class="dots">Scrivo la scheda per <strong>' + esc(name) + '</strong></span>'
+    + '</div>';
+
+  var feats = document.getElementById('s-feat').value.trim();
+  var cat = document.getElementById('s-cat').value.trim();
+  var notes = document.getElementById('s-notes').value.trim();
+  var secs = getSecs('stags');
+  if (!secs.length) { alert('Seleziona almeno una sezione.'); btn.disabled=false; btn.innerHTML='<span id="btnSlbl">'+(resMode?'🔍 Ricerca & Genera':'✦ Genera Scheda')+'</span>'; return; }
+
+  callAPI(buildPrompt(name, feats, cat, notes, tone, secs, research), false).then(function(raw) {
+    var parsed = parseSecs(raw);
+    renderResult(rp, name, parsed, research);
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnSlbl">'+(resMode?'🔍 Ricerca & Genera':'✦ Genera Scheda')+'</span>';
+  }).catch(function(e) {
+    rp.innerHTML = '<div class="ld" style="color:#f87171">Errore: ' + esc(e.message) + '</div>';
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnSlbl">'+(resMode?'🔍 Ricerca & Genera':'✦ Genera Scheda')+'</span>';
+  });
+}
+
+/* ---- RENDER RESULT ---- */
+function renderResult(container, name, secs, research) {
+  var colors = ['var(--acc2)','#a78bfa','var(--acc)','#38bdf8','#f472b6','#fb923c','var(--ok)','#fbbf24','#c084fc'];
+  var strip = '';
+  if (research) {
+    strip = '<div class="sstrip">'
+      + (research.categoria_confermata ? '<span>📂 <strong>'+esc(research.categoria_confermata)+'</strong></span>' : '')
+      + (research.fascia_prezzo ? '<span>💶 <strong>'+esc(research.fascia_prezzo)+'</strong></span>' : '')
+      + ((research.keywords_seo||[]).length ? '<span>🔑 <strong>'+esc((research.keywords_seo||[]).slice(0,3).join(', '))+'</strong></span>' : '')
+      + '<span style="color:var(--acc);font-family:\'DM Mono\',monospace;font-size:10px">🔍 basato su ricerca web</span>'
+      + '</div>';
+  }
+
+  var cards = Object.entries(secs).map(function(entry, i) {
+    var key = entry[0]; var val = entry[1];
+    var isBig = key.toLowerCase().indexOf('titolo') !== -1;
+    var safeVal = JSON.stringify(val);
+    return '<div class="rs">'
+      + '<div class="rl" style="color:'+colors[i%colors.length]+'">'+esc(key)+'</div>'
+      + '<div class="rv'+(isBig?' big':'')+'">'+esc(val)+'</div>'
+      + '<div style="margin-top:9px"><button class="btn-s" onclick="cp('+safeVal+')">⎘ Copia</button></div>'
+      + '</div>';
+  }).join('');
+
+  var allText = Object.entries(secs).map(function(e){ return '== '+e[0]+' ==\n'+e[1]; }).join('\n\n');
+  var safeAll = JSON.stringify(allText);
+
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+    + '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:700">✦ '+esc(name)+'</div>'
+    + '<button class="btn-s" onclick="cp('+safeAll+')">⎘ Copia tutto</button>'
+    + '</div>'
+    + strip
+    + '<div class="rc">'+cards+'</div>';
+}
+
+/* ---- CSV ---- */
+function handleCSV(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev){ parseCSV(ev.target.result); };
+  r.readAsText(f, 'UTF-8');
+}
+function parseManual() {
+  var t = document.getElementById('mcsv').value.trim(); if (!t) return; parseCSV(t);
+}
+function parseCSV(text) {
+  var lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) { alert('CSV non valido.'); return; }
+  var hdrs = lines[0].split(',').map(function(h){ return h.trim().toLowerCase().replace(/['"]/g,''); });
+  var rows = lines.slice(1).map(function(l){
+    var vals = l.split(',').map(function(v){ return v.trim().replace(/^["']|["']$/g,''); });
+    var o = {};
+    hdrs.forEach(function(h,i){ o[h] = vals[i]||''; });
+    return o;
+  }).filter(function(r){ return r.nome||r[hdrs[0]]; });
+  csvRows = rows;
+  document.getElementById('st-rows').textContent = rows.length;
+  document.getElementById('st-cols').textContent = hdrs.length;
+  var cprev = document.getElementById('cprev');
+  cprev.style.display = 'block';
+  var cgen = document.getElementById('cgen');
+  cgen.style.display = 'block';
+  var th = hdrs.map(function(h){ return '<th>'+esc(h)+'</th>'; }).join('');
+  var trs = rows.slice(0,7).map(function(r){ return '<tr>'+hdrs.map(function(h){ return '<td>'+esc(r[h]||'')+'</td>'; }).join('')+'</tr>'; }).join('');
+  if (rows.length>7) trs += '<tr><td colspan="'+hdrs.length+'" style="color:var(--muted);text-align:center;padding:10px">+ altri '+(rows.length-7)+'</td></tr>';
+  document.getElementById('ptable').innerHTML = '<thead><tr>'+th+'</tr></thead><tbody>'+trs+'</tbody>';
+}
+
+/* ---- MULTI GENERATE ---- */
+function generateMulti() {
+  if (!csvRows.length) { alert('Carica prima un CSV.'); return; }
+  var btn = document.getElementById('btnM');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="border-color:rgba(0,0,0,.3);border-top-color:#000"></div><span>Generazione…</span>';
+  var t = document.getElementById('m-tone').value;
+  var notes = document.getElementById('m-notes').value.trim();
+  var useRes = document.getElementById('m-res').checked;
+  var secs = getSecs('mtags');
+  if (!secs.length) { alert('Seleziona sezioni.'); btn.disabled=false; btn.innerHTML='<span>⊞ Genera Tutto</span>'; return; }
+
+  multiOut = [];
+  document.getElementById('mres').innerHTML = '';
+  document.getElementById('pbwrap').style.display = 'block';
+  document.getElementById('bec').disabled = true;
+  document.getElementById('bet').disabled = true;
+
+  var total = csvRows.length;
+  var i = 0;
+
+  function next() {
+    if (i >= total) {
+      document.getElementById('pb').style.width = '100%';
+      document.getElementById('mlbl').textContent = '✓ '+total+' schede generate';
+      document.getElementById('bec').disabled = false;
+      document.getElementById('bet').disabled = false;
+      btn.disabled = false;
+      btn.innerHTML = '<span>⊞ Rigenera Tutto</span>';
+      return;
+    }
+    var row = csvRows[i];
+    var name = row.nome||row[Object.keys(row)[0]]||('Prodotto '+(i+1));
+    var feats = row.caratteristiche||row.features||row.descrizione||'';
+    var cat = row.categoria||row.category||'';
+    var rn = (row.note||row.notes||'')+(notes?' '+notes:'');
+
+    document.getElementById('mlbl').textContent = (i+1)+' / '+total+' — '+name;
+    document.getElementById('pb').style.width = ((i/total)*100)+'%';
+
+    var card = document.createElement('div');
+    card.className = 'rm';
+    card.innerHTML = '<div class="rm-hd"><div class="rm-title">⏳ '+esc(name)+'</div><div style="font-size:11px;color:var(--muted)">'+(useRes?'🔍 Ricerca…':'Generazione…')+'</div></div>';
+    document.getElementById('mres').appendChild(card);
+    card.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+    var doIt = function(research) {
+      return callAPI(buildPrompt(name, feats, cat, rn, t, secs, research), false).then(function(raw){
+        var parsed = parseSecs(raw);
+        multiOut.push({ name: name, raw: raw, parsed: parsed });
+        renderMiniCard(card, name, parsed, raw);
+      });
+    };
+
+    var p;
+    if (useRes) {
+      p = callAPI(buildResearchPrompt(name, cat, feats), true).then(function(raw){
+        var jm = raw.match(/\{[\s\S]*\}/);
+        var res = null;
+        if (jm) { try { res = JSON.parse(jm[0]); } catch(e){} }
+        return doIt(res);
+      });
+    } else {
+      p = doIt(null);
+    }
+
+    p.catch(function(e){
+      multiOut.push({ name: name, raw: 'ERRORE: '+e.message, parsed: {} });
+      card.innerHTML = '<div class="rm-hd" style="border-color:#f87171"><div class="rm-title" style="color:#f87171">✗ '+esc(name)+'</div><div style="font-size:11px;color:#f87171">'+esc(e.message)+'</div></div>';
+    }).then(function(){
+      i++;
+      setTimeout(next, 350);
+    });
+  }
+
+  next();
+}
+
+function renderMiniCard(card, name, secs, raw) {
+  var body = Object.entries(secs).map(function(e){
+    return '<div><div class="rl" style="color:var(--acc2);margin-bottom:3px">'+esc(e[0])+'</div><div style="font-size:12px;color:#ccc;line-height:1.65">'+esc(e[1])+'</div></div>';
+  }).join('');
+  var safeAll = JSON.stringify(Object.entries(secs).map(function(e){ return '== '+e[0]+' ==\n'+e[1]; }).join('\n\n'));
+  card.innerHTML = '<div class="rm-hd" onclick="tog(this)">'
+    + '<div class="rm-title">✦ '+esc(name)+'</div>'
+    + '<div style="display:flex;align-items:center;gap:8px"><button class="btn-s" style="font-size:11px;padding:5px 11px" onclick="event.stopPropagation();cp('+safeAll+')">⎘ Copia</button><span style="color:var(--acc);font-size:15px">▾</span></div>'
+    + '</div>'
+    + '<div class="rm-body op" style="gap:12px">'+body+'</div>';
+}
+
+function tog(hd) { hd.nextElementSibling.classList.toggle('op'); }
+
+/* ---- EXPORT ---- */
+function exportCSV() {
+  if (!multiOut.length) return;
+  var keys = Array.from(new Set(multiOut.flatMap(function(r){ return Object.keys(r.parsed); })));
+  var hdr = ['nome'].concat(keys).join(',');
+  var rows = multiOut.map(function(r){
+    return [r.name].concat(keys.map(function(k){ return '"'+(r.parsed[k]||'').replace(/"/g,'""').replace(/\n/g,' ')+'"'; })).join(',');
+  });
+  dl('schede-prodotto.csv', [hdr].concat(rows).join('\n'), 'text/csv');
+}
+function exportTXT() {
+  if (!multiOut.length) return;
+  var t = multiOut.map(function(r){ return '='.repeat(58)+'\n'+r.name+'\n'+'='.repeat(58)+'\n'+r.raw+'\n'; }).join('\n');
+  dl('schede-prodotto.txt', t, 'text/plain');
+}
+function dl(name, content, type) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type:type}));
+  a.download = name; a.click();
+}
+
+/* ---- UTILS ---- */
+function cp(text) { navigator.clipboard.writeText(text).then(function(){ toast(); }); }
+function toast() {
+  var t = document.getElementById('toast'); t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 1800);
+}
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* drag drop */
+var ua = document.getElementById('ua');
+if (ua) {
+  ua.addEventListener('dragover', function(e){ e.preventDefault(); ua.classList.add('dov'); });
+  ua.addEventListener('dragleave', function(){ ua.classList.remove('dov'); });
+  ua.addEventListener('drop', function(e){
+    e.preventDefault(); ua.classList.remove('dov');
+    var f = e.dataTransfer.files[0];
+    if (f && f.name.endsWith('.csv')) { var r=new FileReader(); r.onload=function(ev){parseCSV(ev.target.result);}; r.readAsText(f,'UTF-8'); }
+  });
+}
+</script>
+</body>
+</html>
