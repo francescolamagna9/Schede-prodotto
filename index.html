@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schede Prodotto AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- API KEY BAR -->
+  <div class="apibar" id="apibar">
+    <div class="apibar-inner">
+      <span class="apibar-label">🔑 Gemini API Key</span>
+      <input type="password" id="apikey" placeholder="Incolla la tua API Key di Google AI Studio…" oninput="saveKey()">
+      <span class="apibar-hint">Salvata localmente — non condivisa</span>
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" class="apibar-link">Ottieni gratis →</a>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="logo">Schede<span>Prodotto</span>.ai</div>
+    <div class="hdr-right">
+      <div class="badge">Agency Toolkit</div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="tabs">
+    <button class="tab active" onclick="switchTab('single', this)">✦ Singolo</button>
+    <button class="tab" onclick="switchTab('multi', this)">⊞ Multi CSV</button>
+  </nav>
+
+  <!-- PANELS -->
+  <div class="panels">
+
+    <!-- ===== SINGLE ===== -->
+    <div class="panel active" id="panel-single">
+      <div class="split">
+
+        <!-- LEFT FORM -->
+        <aside class="lp">
+
+          <div class="fg">
+            <div class="sec-label">Prodotto</div>
+            <label class="lbl">Nome prodotto *</label>
+            <input type="text" id="s-name" placeholder="es. Scarpa Running Pro X3, Crema Retinol…">
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Categoria <span class="hint">opzionale</span></label>
+            <input type="text" id="s-cat" placeholder="es. Sport, Cosmetica, Elettronica…">
+          </div>
+
+          <!-- RESEARCH TOGGLE -->
+          <div class="rtog" id="rtog" onclick="toggleRes()">
+            <div class="rtog-row">
+              <div class="rtog-left">
+                <div class="pill" id="rpill"><div class="knob"></div></div>
+                <div>
+                  <div class="rtog-title">🔍 Ricerca automatica</div>
+                  <div class="rtog-sub">L'AI cerca le caratteristiche del prodotto</div>
+                </div>
+              </div>
+              <div class="rbadge" id="rbadge">ON</div>
+            </div>
+            <div class="rinfo" id="rinfo">
+              Hai solo il nome? Gemini cercherà specifiche tecniche, materiali, keyword SEO e contesto di mercato. I dati trovati vengono mostrati prima di generare.
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Caratteristiche <span class="hint" id="feat-hint">opzionale</span></label>
+            <textarea id="s-feat" placeholder="es. suola grip ammortizzata, peso 280g, impermeabile, 5 colori…"></textarea>
+          </div>
+
+          <div class="fg">
+            <div class="sec-label">Tono di voce</div>
+            <div class="tone-grid" id="tone-grid">
+              <button class="tone active" data-t="Professionale e autorevole" onclick="pickTone(this)">🏢 Professionale</button>
+              <button class="tone" data-t="Amichevole e coinvolgente" onclick="pickTone(this)">😊 Amichevole</button>
+              <button class="tone" data-t="Lusso, raffinato, premium" onclick="pickTone(this)">✦ Luxury</button>
+              <button class="tone" data-t="Diretto, persuasivo, conversione" onclick="pickTone(this)">⚡ Conversion</button>
+              <button class="tone" data-t="Tecnico, dettagliato, specifico" onclick="pickTone(this)">🔧 Tecnico</button>
+              <button class="tone" data-t="Giovane, fresco, dinamico" onclick="pickTone(this)">🔥 Gen Z</button>
+            </div>
+          </div>
+
+          <div class="fg">
+            <div class="sec-label">Sezioni da generare</div>
+            <div class="tags" id="s-tags">
+              <button class="tag active" onclick="this.classList.toggle('active')">Titolo SEO</button>
+              <button class="tag active" onclick="this.classList.toggle('active')">Descrizione breve</button>
+              <button class="tag active" onclick="this.classList.toggle('active')">Descrizione completa</button>
+              <button class="tag active" onclick="this.classList.toggle('active')">Bullet point vantaggi</button>
+              <button class="tag active" onclick="this.classList.toggle('active')">Specifiche tecniche</button>
+              <button class="tag active" onclick="this.classList.toggle('active')">Meta description SEO</button>
+              <button class="tag" onclick="this.classList.toggle('active')">FAQ (3 domande)</button>
+              <button class="tag" onclick="this.classList.toggle('active')">Testo per categoria</button>
+              <button class="tag" onclick="this.classList.toggle('active')">Alt text immagine</button>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Note brand <span class="hint">opzionale</span></label>
+            <input type="text" id="s-notes" placeholder="es. Usa sempre 'ProX', evita tecnicismi…">
+          </div>
+
+          <button class="btn-primary" id="btn-single" onclick="startSingle()">
+            <span id="btn-single-lbl">✦ Genera Scheda</span>
+          </button>
+
+        </aside>
+
+        <!-- RIGHT OUTPUT -->
+        <main class="rp" id="rp">
+          <div class="empty" id="empty-state">
+            <div class="empty-icon">✦</div>
+            <h2>Pronto a generare</h2>
+            <p>Inserisci il nome del prodotto e premi <strong>Genera Scheda</strong>.</p>
+          </div>
+        </main>
+
+      </div>
+    </div>
+
+    <!-- ===== MULTI CSV ===== -->
+    <div class="panel" id="panel-multi">
+      <div class="csv-layout">
+
+        <div class="csv-intro">
+          <div class="sec-label">Multi-Generator CSV</div>
+          <p>Colonne supportate: <code>nome</code>, <code>caratteristiche</code>, <code>categoria</code>, <code>note</code></p>
+        </div>
+
+        <div class="csv-top">
+
+          <div class="csv-upload-col">
+            <label class="upload-area">
+              <input type="file" accept=".csv" onchange="handleCSV(event)">
+              <div class="upload-icon">📂</div>
+              <h3>Carica CSV</h3>
+              <p>clicca o trascina il file</p>
+            </label>
+            <div class="manual-area">
+              <div class="sec-label">Oppure incolla i dati</div>
+              <textarea id="m-csv-paste" placeholder="nome,caratteristiche,categoria&#10;Scarpa X3,suola grip gel,Sport&#10;Crema Anti-Age,retinolo vitamina C,Beauty"></textarea>
+              <button class="btn-secondary" onclick="parseManual()" style="width:100%;justify-content:center;margin-top:6px">↳ Carica dati</button>
+            </div>
+          </div>
+
+          <div class="csv-settings">
+            <div class="sec-label">Impostazioni globali</div>
+
+            <div class="fg">
+              <label class="lbl">Tono di voce</label>
+              <select id="m-tone">
+                <option value="Professionale e autorevole">🏢 Professionale</option>
+                <option value="Amichevole e coinvolgente">😊 Amichevole</option>
+                <option value="Lusso, raffinato, premium">✦ Luxury</option>
+                <option value="Diretto, persuasivo, conversione">⚡ Conversion</option>
+                <option value="Tecnico, dettagliato, specifico">🔧 Tecnico</option>
+                <option value="Giovane, fresco, dinamico">🔥 Gen Z</option>
+              </select>
+            </div>
+
+            <div class="fg">
+              <div class="sec-label">Sezioni</div>
+              <div class="tags" id="m-tags">
+                <button class="tag active" onclick="this.classList.toggle('active')">Titolo SEO</button>
+                <button class="tag active" onclick="this.classList.toggle('active')">Descrizione breve</button>
+                <button class="tag active" onclick="this.classList.toggle('active')">Descrizione completa</button>
+                <button class="tag active" onclick="this.classList.toggle('active')">Bullet point vantaggi</button>
+                <button class="tag active" onclick="this.classList.toggle('active')">Specifiche tecniche</button>
+                <button class="tag active" onclick="this.classList.toggle('active')">Meta description SEO</button>
+                <button class="tag" onclick="this.classList.toggle('active')">FAQ</button>
+              </div>
+            </div>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="m-research">
+              🔍 Ricerca automatica per ogni prodotto
+              <span class="hint" style="display:block;padding-left:22px">Ideale se il CSV ha solo i nomi</span>
+            </label>
+
+            <div class="fg">
+              <label class="lbl">Note brand globali</label>
+              <input type="text" id="m-notes" placeholder="es. Tono caldo, evita tecnicismi…">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TABLE PREVIEW -->
+        <div class="csv-preview" id="csv-preview" style="display:none">
+          <div class="csv-preview-hd">
+            <span class="preview-title">Anteprima dati</span>
+            <div class="stats">
+              <div class="stat"><div class="stat-n" id="stat-rows">0</div><div class="stat-l">Prodotti</div></div>
+              <div class="stat"><div class="stat-n" id="stat-cols">0</div><div class="stat-l">Colonne</div></div>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="preview-table"></table></div>
+        </div>
+
+        <!-- GENERATE CONTROLS -->
+        <div class="gen-controls" id="gen-controls" style="display:none">
+          <div class="gen-footer">
+            <button class="btn-primary" id="btn-multi" onclick="generateMulti()" style="max-width:220px">⊞ Genera Tutto</button>
+            <button class="btn-secondary" id="btn-export-csv" onclick="exportCSV()" disabled>⬇ Esporta CSV</button>
+            <button class="btn-secondary" id="btn-export-txt" onclick="exportTXT()" disabled>⬇ Esporta TXT</button>
+            <span class="progress-label" id="progress-label"></span>
+          </div>
+          <div class="progress-bar-wrap" id="pb-wrap" style="display:none">
+            <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="multi-results" id="multi-results"></div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">✓ Copiato!</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
